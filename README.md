@@ -1,7 +1,7 @@
 # Resource Management
 This Resource Management application indicates available resources for the week of March 6th to March 10th. The application includes the following features:
 <ul>
-<li> It displays all the hours a selected user is available and unavailable. </li>
+<li> It displays all the hours, a selected user is available and unavailable. </li>
  <li>Finds the user with high availability and low availability. </li>
  <li>Identifies users available for repeating task for 5 days from 3/6 to 3/10 in morning hours (8AM-12PM), each day dedicating 1 hour each, .</li>
  <li>Prints in the descending order of hours; users busy with task work and the respective hour.</li>
