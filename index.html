@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Resource Management</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/calendar.css" rel="stylesheet" />
+    <script type="text/javascript" src="lib/jquery-1.11.3.js"></script>
+
+    <!-- Custom CSS -->
+    <style>
+    body {
+        padding-top: 100px;
+        /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+    }
+    </style>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Resource Management</a>
+            </div>
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class="row">
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" id="menu1"  data-toggle="dropdown">User
+                    <span class="caret"></span></button>
+                <ul class="dropdown-menu" id="user_menu">
+                </ul>
+                <label id="userlabel"></label>
+            </div>
+        <div id="calendar"></div>
+        <div id="demo"></div>
+        <input type="text" id="dateValue" hidden/><br/>
+            <div id="user_free_hours"></div>
+        <div id="user_busy_hours"></div>
+           <div id="repetitive_tasks"></div>
+            <div id="max_availablity"></div>
+            <div id="min_availablity"></div>
+            <div id="task_list"></div>
+            <div id="meetings_list"></div>
+
+        </div>
+    </div>
+    <!-- /.container -->
+
+    <script type="text/javascript" src="js/resourceManager.js"></script>
+    <script type="text/javascript" src="js/calendar.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+
+</body>
+
+</html>

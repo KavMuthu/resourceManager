@@ -1,0 +1,29 @@
+{
+  "result": [
+    {
+      "name": "Hashim Amla",
+      "user_name": "hashim.amla",
+      "sys_id": "26d1f8d9db19320049a1dfea5e961915"
+    },
+    {
+      "name": "AB deVilliers",
+      "user_name": "ab.devilliers",
+      "sys_id": "44513c5ddb19320049a1dfea5e9619e5"
+    },
+    {
+      "name": "Dale Steyn",
+      "user_name": "dale.steyn",
+      "sys_id": "6ec1b41ddb19320049a1dfea5e961919"
+    },
+    {
+      "name": "Kagiso Rabada",
+      "user_name": "kagiso.rabada",
+      "sys_id": "abe1741ddb19320049a1dfea5e9619dc"
+    },
+    {
+      "name": "Faf du Plessis",
+      "user_name": "faf.duplessis",
+      "sys_id": "baa1f85ddb19320049a1dfea5e9619f1"
+    }
+  ]
+}

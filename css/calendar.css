@@ -1,0 +1,91 @@
+
+body {
+	font-family: arial;
+}
+#myTable {
+	width: 550px;
+	height: 470px;
+	background-color: #fcfcfc;
+	padding: 10px 0px;
+	box-shadow: 0px 2px 4px rgba(0,0,0,0.5);
+}
+#myTable span {
+	display: inline-block;
+	width: 75px;
+	padding: 10px;
+	text-align: center;
+}
+#myTable span.dayActive {
+	background-color: grey;
+	color: #ffffff;
+}
+#myTable span.dayActive button {
+	color: #ffffff;
+}
+#myTable span.prevDay button {
+	color: lightgrey;
+}
+#myTable span.selected {
+	background-color: green;
+	color: #ffffff;
+}
+#myTable span button, #myTable span button:focus {
+	background-color: transparent;
+	border: none;
+	outline-color: transparent;
+	color: inherit;
+}
+.month, .year {
+	text-align: center;
+	padding: 10px 0px;
+	font-size: 20px;
+}
+.month {
+	background-color: #dddddd;
+	box-shadow: 0px 3px 8px #cccccc;
+}
+.weeks span {
+	font-weight: 600;
+}
+a.btn {
+	font-size: 30px;
+	cursor: pointer;
+	padding: 10px 20px;
+}
+.showClass {
+	display: block;
+}
+.hideClass {
+	display: none;
+}
+#dateValue {
+	margin-top: 20px;
+	width: 200px;
+	padding: 10px;
+}
+
+#usersLabel{
+	list-style:none;
+}
+#avbl_time{
+	list-style:none;
+	font-weight: normal;
+	padding:5px;
+}
+#user_namelabel{
+	padding-bottom: 5px;
+}
+#calendar{
+	margin-top: 20px;
+}
+
+.container{
+
+	margin-right: 20px;
+	margin-left: 50px;
+	float:left;
+}
+#usersLabel, #repTasks_list, #tasks_list, #meetings_list, #min_availability, #max_availability{
+	font-weight: normal;
+	padding:5px;
+}
