@@ -1,8 +1,4 @@
-/**
- * Created by Kavi on 3/6/17.
- */
-
-var user_data, events_data, date_finalValue, user_name;
+var user_data, events_data, date_finalValue,date_val,user_name;
 //global access to user.json objects
 user_data = (function () {
     var json = null;
@@ -33,7 +29,7 @@ events_data = (function () {
     });
     return json;
 })();
-console.log(events_data)
+console.log(events_data);
 
 //method to populate the user names in the drop down menu
 window.onload = function () {
@@ -52,10 +48,12 @@ window.onload = function () {
             dropwdown_menu.append(li_tag);
         });
     }
-    //invocation of the following method to find the employee(s) available from 8AM - 12PM for assigning repetitive tasks
-    repTaskSchedule(ids);
+
 
 }
+
+
+
 //method to get the user name
 $(document.body).on('click', '.dropdown-menu li a', function (e) {
     user_name = $(this).text();
@@ -64,7 +62,7 @@ $(document.body).on('click', '.dropdown-menu li a', function (e) {
 //on click method for selection of dates
 $(document.body).on('click', '#eachDay', function (e) {
     var date = $('#dateValue').val();
-    var date_val = date.split("/");
+    date_val = date.split("/");
 
     //printing date in the format 20170303 by appending zeroes to the months and days less than 9
     if (parseInt(date_val[1]) <= 9) {
@@ -84,12 +82,35 @@ $(document.body).on('click', '#eachDay', function (e) {
         alert("Please select the user name");
         return;
     }
-    userUnAvailableHours();
+
     userObjHelper();
 });
 
-//Method to convert json object to javascript object.
-//Since, the user object is required throughout the program, the object array is made global.
+var User = function (id, name, date, start_time, end_time, type){
+    this.id = id;
+    this.name = name;
+    this.date = date;
+    this.start_time = start_time;
+    this.end_time = end_time;
+    this.type = type;
+
+
+    this.toJson = function(){
+        return {
+            "id" : this.id,
+            "name": this.name,
+            "date": this.date,
+            "start_time": this.start_time,
+            "end_time": this.end_time,
+            "type": this.type
+        }
+    }
+};
+User.fromJson = function (json){
+    var obj = JSON.parse (json);
+    return new User (obj.id, obj.name, obj.date, obj.start_time, obj.end_time, obj.type);
+};
+
 var userObj_array = {};
 function userObjHelper() {
 
@@ -97,18 +118,19 @@ function userObjHelper() {
     var sys_id = [{}];
     for (var i in user_data) {
         user_data[i].forEach(function (res) {
-            sys_id.push(res.sys_id);
+            sys_id.push({"id":res.sys_id, "user_name":res.name});
         });
     }
 
     //creates a user object array and stores sys_id, date, start_time, end_time and type for a particular date selected.
-    var avbl_users = [{}];
-    var u_id, task_date, u_startTime, u_endTime;
+    var users = [{}];
+    var usersForRepetitiveTasks = [{}];
+    var u_id = ' ', task_date = ' ', u_startTime = ' ', u_endTime = ' ', user= ' ', json= ' ';
     for (var i in events_data) {
 
         events_data[i].forEach(function (res) {
             for (var j in sys_id) {
-                if (sys_id[j] === res.user.value) {
+                if (sys_id[j].id === res.user.value) {
 
                     var end_date_time = res.end_date_time;
                     var start_date_time = res.start_date_time;
@@ -116,45 +138,44 @@ function userObjHelper() {
 
                     var end_time = end_date_time.split("T");
                     var start_time = start_date_time.split("T");
+                    u_id = res.user.value;
+                    task_date = end_time[0];
+                    u_startTime = start_time[1];
+                    u_endTime = end_time[1];
+
+                    user = new User (u_id, sys_id[j].user_name, task_date, u_startTime, u_endTime, work_type);
+                    json = user.toJson();
+                    //console.log(json);
+                    usersForRepetitiveTasks.push(json);
+
+
                     if (end_time[0] == date_finalValue) {
-                        u_id = res.user.value,
-                            task_date = end_time[0];
-                        u_startTime = start_time[1];
-                        u_endTime = end_time[1];
-
-                        avbl_users.push({
-                            "sys_id": u_id,
-                            "date": task_date,
-                            "start_time": u_startTime,
-                            "end_time": u_endTime,
-                            "type": work_type
-                        });
-                        return;
+                        users.push(json);
                     }
-
                 }
             }
 
         })
     }
-
-    taskList(avbl_users);
+    //console.log(usersForRepetitiveTasks);
+    taskList(users);
 
     //consolidates the number of hours each user has worked on a particular day.
     var users_avbl = {};
-    var i = 1;
-    for (var i in avbl_users) {
-        var item = avbl_users[i];
-        if (users_avbl[item.sys_id] === undefined) {
-            users_avbl[item.sys_id] = "0 ";
+
+    for (var i in users) {
+        var item = users[i];
+        if (users[item.id] === undefined) {
+            users_avbl[item.id] = "0 ";
         }
-        users_avbl[item.sys_id] += item.start_time + " ";
-        users_avbl[item.sys_id] += item.end_time + " ";
+
+        users_avbl[item.id] += item.start_time + " ";
+        users_avbl[item.id] += item.end_time + " ";
 
     }
+    console.log(users_avbl);
     var results = {};
     results = [];
-    avbl_users = [];
     var end_time = {};
     var start_time = {};
     for (var i in users_avbl) {
@@ -169,6 +190,8 @@ function userObjHelper() {
         var user_id = results[i].user_id;
         var work_hours = results[i].work_hours.split(' ');
 
+        console.log(work_hours);
+
         for (var i = 1; i <= work_hours.length - 2; i++) {
             if (i % 2 == 0) {
                 end_time.push(work_hours[i]);
@@ -177,52 +200,37 @@ function userObjHelper() {
             }
 
         }
-        userObj_array.push({"user_id": user_id, "start_time": start_time, "end_time": end_time});
+
+        userObj_array.push({"user_id": user_id,"start_time": start_time, "end_time": end_time});
     }
-    maxMinAvailability(userObj_array);
+    console.log(userObj_array);
     availableHours(userObj_array);
+    userUnAvailableHours(users);
+    maxMinAvailability(userObj_array);
+    //invocation of the following method to find the employee(s) available from 8AM - 12PM for assigning repetitive tasks
+    repTaskSchedule(usersForRepetitiveTasks);
 }
+
 //Method to find hours when the users are occupied with tasks or meetings.
-function userUnAvailableHours() {
+function userUnAvailableHours(users) {
 
     var user_namelabel = document.createElement('label');
     user_namelabel.append(user_name + " is unavailable during: ");
-    var busy_hours = [{}];
 
-    //fetch of user_ids
-    for (var i in user_data) {
-        user_data[i].forEach(function (res) {
-            if (user_name === res.name) {
-                user_sys_id = res.sys_id;
-            }
-        });
-    }
+    //looping through the user object to display the busy hours
+    users.forEach(function(res){
+        if(res.name === user_name){
 
-    //creates an array list of work hours for a particular user on a particular day.
-    for (var i in events_data) {
-        events_data[i].forEach(function (res) {
 
-            if (user_sys_id === res.user.value) {
-                var end_date_time = res.end_date_time;
-                var start_date_time = res.start_date_time;
-                var event_end_date = end_date_time.split("T");
-                var event_start_date = start_date_time.split("T");
-                if (event_end_date[0] == date_finalValue) {
-                    var start_time = convertTimestamp(event_start_date[1]);
+            var hours_label = document.createElement('li');
+            hours_label.id = 'usersLabel';
+            hours_label.innerHTML = convertTimestamp(res.start_time) + " - " + convertTimestamp(res.end_time);
+            user_namelabel.append(hours_label);
 
-                    var end_time = convertTimestamp(event_end_date[1]);
-                    //dynamic creation of html elements to create a view for the busy hours
-                    var br = document.createElement('br');
-                    var hours_label = document.createElement('li');
-                    hours_label.id = 'usersLabel';
-                    hours_label.innerHTML = start_time + " - " + end_time;
-                    user_namelabel.append(hours_label);
-                    busy_hours.push({"user_name": user_name, "start_time": start_time, "end_time": end_time});
-                }
 
-            }
-        })
-    }
+        }
+    });
+
     //the html li elements are appended to the main 'user_busy_hours' div tag
     var div = document.getElementById("user_busy_hours");
     var hr = document.createElement("hr");
@@ -230,30 +238,7 @@ function userUnAvailableHours() {
     div.append(user_namelabel);
     div.append(hr);
 }
-//Method to convert a string time (080000) to hours with am/pm appended (08:00 AM).
-function convertTimestamp(timestamp) {
 
-    var ampm = 'AM', hh, mm, time, h;
-    for (var i = 0; i <= timestamp.length; i++) {
-
-        hh = timestamp[0] + timestamp[1];
-        mm = timestamp[2] + timestamp[3];
-    }
-    if (parseInt(hh) > 12) {
-        h = hh - 12;
-        ampm = 'PM';
-    } else if (parseInt(hh) == 12) {
-        h = 12;
-        ampm = 'PM';
-    } else if (parseInt(hh) == 0) {
-        h = 12;
-    } else {
-        h = hh;
-    }
-    time = h + ":" + mm + ' ' + ampm;
-
-    return time;
-}
 /**
  *
  * @param userObj_array - array of user data (ids, start_times and end_times)
@@ -263,12 +248,15 @@ function convertTimestamp(timestamp) {
 
 function availableHours(userObj_array) {
 
+    console.log("Available hours");
+    console.log(userObj_array);
+
     var user_namelabel = document.createElement('label');
     user_namelabel.id = 'user_namelabel';
     user_namelabel.class = "label-success";
     user_namelabel.append(user_name + " is available during: ");
 
-    var user_id;
+    var user_id = ' ';
     for (var i in user_data) {
         user_data[i].forEach(function (res) {
             if (user_name === res.name) {
@@ -287,8 +275,10 @@ function availableHours(userObj_array) {
     for (var i in userObj_array) {
         var user = userObj_array[i];
         var u_id = user.user_id;
-
+        console.log("available: " + user_id);
+        console.log(user_id == u_id);
         if (user_id == u_id) {
+            console.log(user.start_time);
             for (var i = 0; i < user.start_time.length; i++) {
                 var start_index = timingsArray.indexOf(parseInt(user.start_time[i]));
                 startIndices.push(start_index);
@@ -302,7 +292,7 @@ function availableHours(userObj_array) {
     //boolean array is created with true, false values based on user busy hours.
     for (var j in startIndices) {
         var diff = endIndices[j] - startIndices[j];
-
+        console.log(diff);
         if (diff > 1) {
             for (var i = startIndices[j]; i <= endIndices[j]; i++) {
                 boolArray[i] = false;
@@ -314,7 +304,7 @@ function availableHours(userObj_array) {
         }
 
     }
-
+    console.log(boolArray);
     //indices array holds the indices of the free hours
     var indicesList = [];
     for (var b in boolArray) {
@@ -388,6 +378,104 @@ function availableHours(userObj_array) {
 
     div.append(user_namelabel);
 }
+
+//Method to convert a string time (080000) to hours with am/pm appended (08:00 AM).
+function convertTimestamp(timestamp) {
+
+    var ampm = 'AM', hh, mm, time, h;
+    for (var i = 0; i <= timestamp.length; i++) {
+
+        hh = timestamp[0] + timestamp[1];
+        mm = timestamp[2] + timestamp[3];
+    }
+    if (parseInt(hh) > 12) {
+        h = hh - 12;
+        ampm = 'PM';
+    } else if (parseInt(hh) == 12) {
+        h = 12;
+        ampm = 'PM';
+    } else if (parseInt(hh) == 0) {
+        h = 12;
+    } else {
+        h = hh;
+    }
+    time = h + ":" + mm + ' ' + ampm;
+
+    return time;
+}
+
+//Method to find users who are available through the week of March 6th for assigning  repetitive tasks for an hour.
+function repTaskSchedule(users) {
+
+    //html label creation
+    var label = document.createElement('label');
+    label.id = 'repTask_label';
+    label.append("An hour of repetitive task between 8AM and 12PM on " + date_val[1]+"/" + date_val[2] + "/" +date_val[0] + " can be assigned to:");
+    var repTasks_availableUsers = [{}];
+    var repTasks_unAvailableUsers = [{}];
+
+    //creates a list of users who are available for repetitive tasks
+    for(var i in users){
+
+        if(parseInt(users[i].date) >= date_finalValue && parseInt(users[i].date) <= date_finalValue){
+            if (parseInt(users[i].start_time) > 080000 && parseInt(users[i].end_time) < 120000 && (parseInt(users[i].end_time) - parseInt(users[i].start_time) >= 1 )) {
+                repTasks_availableUsers.push({"id":users[i].id,"name":users[i].name,"date":users[i].date});
+            }
+
+            if (users[i].start_time != '080000' && users[i].end_time != '120000') {
+                repTasks_availableUsers.push({"id":users[i].id,"name":users[i].name,"date":users[i].date});
+
+            } else {
+                repTasks_unAvailableUsers.push({"id":users[i].id,"name":users[i].name,"date":users[i].date});
+            }
+        }
+    }
+    //creates a list of a employees working from 8AM-12PM and 1PM-5PM
+    var unavbl_users = [];
+    for(var i in users){
+        for(var j in repTasks_availableUsers){
+            if(users[i].id === repTasks_availableUsers[j].id){
+                if(users[i].start_time === '080000' && users[i].end_time === '120000'){
+                    unavbl_users.push(users[i].name);
+                }
+            }
+        }
+    }
+
+    var unAvailableUsers = [];
+    $.each(unavbl_users, function (i, el) {
+        if ($.inArray(el, unAvailableUsers) === -1) unAvailableUsers.push(el);
+    });
+    //eliminates employees working from 1pm-5pm and retains employees working from 8am-12pm
+    if(unAvailableUsers != null){
+        unAvailableUsers.forEach(function(res){
+            repTasks_availableUsers.forEach(function(response){
+                if(response.name === res){
+                    repTasks_availableUsers.splice(repTasks_availableUsers.indexOf(response), 1);
+                }
+            })
+        });
+    }
+
+    //creates html elements for displaying the user(s) available to assign the repetitive tasks
+    repTasks_availableUsers.forEach(function(res){
+        if(res.name != undefined){
+            var li_tag = document.createElement('li');
+            li_tag.id = 'repTasks_list';
+            li_tag.append(res.name);
+            label.append(li_tag);
+        }
+
+    });
+
+    var hr = document.createElement("hr");
+    var repTasks_div = document.getElementById('repetitive_tasks');
+    $('#repetitive_tasks').empty();
+    repTasks_div.append(label);
+    repTasks_div.append(hr);
+
+}
+
 //Method to find the max and min busy hours.
 function maxMinAvailability(userObj_array) {
 
@@ -402,7 +490,7 @@ function maxMinAvailability(userObj_array) {
 
     //total no.of hours worked is calculated
     var user_workHours = [{}];
-    //var sum = 0;
+
     for (var i in userObj_array) {
         var start_timeArray = userObj_array[i].start_time;
         var end_timeArray = userObj_array[i].end_time;
@@ -481,84 +569,10 @@ function maxMinAvailability(userObj_array) {
 
 
 }
-//Method to find users who are available through the week of March 6th for assigning  repetitive tasks for an hour.
-function repTaskSchedule(user_ids) {
-
-    //html label creation
-    var label = document.createElement('label');
-    label.id = 'repTask_label';
-    label.append('Repetitive tasks for the Week of March 6th can be assigned to: ');
-    var repTasks_availableUsers = [{}];
-    var repTasks_unAvailableUsers = [{}];
-
-    //creates a list of users who are available for repetitive tasks
-    for (var i in user_ids) {
-        for (var j in events_data) {
-            events_data[j].forEach(function (response) {
-                if (response.user.value == user_ids[i]) {
-                    var end_date_time = response.end_date_time.split("T");
-                    var start_date_time = response.start_date_time.split("T");
-
-                    if (start_date_time[1] >= '080000' && end_date_time[1] <= '120000' && (parseInt(end_date_time[1]) - parseInt(start_date_time[1]) >= 1 )) {
-                        repTasks_availableUsers.push(user_ids[i]);
-                    }
-
-                    if (start_date_time[1] != '080000' && end_date_time[1] != '120000') {
-                        repTasks_availableUsers.push(user_ids[i]);
-
-                    } else {
-                        repTasks_unAvailableUsers.push(user_ids[i]);
-                    }
-
-                }
-            })
-        }
-
-    }
-
-    var availableUsers = [];
-    $.each(repTasks_availableUsers, function (i, el) {
-        if ($.inArray(el, availableUsers) === -1) availableUsers.push(el);
-    });
-
-
-    var unAvailableUsers = [];
-    $.each(repTasks_unAvailableUsers, function (i, el) {
-        if ($.inArray(el, unAvailableUsers) === -1) unAvailableUsers.push(el);
-    });
-
-    //over lap of users are eliminated.
-    unAvailableUsers.forEach(function (res_unAvbl) {
-
-        availableUsers.forEach(function (res_avbl) {
-            if (res_unAvbl == res_avbl) {
-                availableUsers.splice(availableUsers.indexOf(res_avbl), 1);
-            }
-        })
-    });
-    //dynamic html li elements creation for display the available users for UI.
-    for (var i in availableUsers) {
-
-        for (var j in user_data) {
-            user_data[j].forEach(function (res) {
-                if (availableUsers[i] === res.sys_id) {
-                    var li_tag = document.createElement('li');
-                    li_tag.id = 'repTasks_list';
-                    li_tag.append(res.name);
-                    label.append(li_tag);
-                }
-            });
-        }
-    }
-    var hr = document.createElement("hr");
-    var repTasks_div = document.getElementById('repetitive_tasks');
-    $('#repetitive_tasks').empty();
-    repTasks_div.append(label);
-    repTasks_div.append(hr);
-
-}
 //Method to create a list of users max occupied with tasks and meetings in the descending order.
 function taskList(userObj_array) {
+
+    console.log(userObj_array);
     //html task label
     var task_label = document.createElement('label');
     task_label.append("List of Employees busy with tasks: ");
@@ -574,7 +588,7 @@ function taskList(userObj_array) {
         var type = userObj_array[i].type;
         var start_time = userObj_array[i].start_time;
         var end_time = userObj_array[i].end_time;
-        var user_val = userObj_array[i].sys_id;
+        var user_val = userObj_array[i].id;
 
         var diff = parseInt(end_time) - parseInt(start_time);
         if (type == "task") {
@@ -584,10 +598,12 @@ function taskList(userObj_array) {
         if (type == "meeting") {
             meetingsList.push({"u_id": user_val, "hours": diff, "type": type});
         }
+
     }
+
     //finding the total no.of hours spent on tasks and meetings by each user
     var taskEvents_list = {};
-    var i = 2;
+    var i = 1;
     for (var i in tasksList) {
         var item = tasksList[i];
         if (taskEvents_list[item.u_id] === undefined) {
@@ -602,7 +618,7 @@ function taskList(userObj_array) {
         taskHours.push(taskEvents_list[j]);
     }
     var meetingEvents_list = {};
-    var i = 2;
+    var i = 1;
     for (var i in meetingsList) {
         var item = meetingsList[i];
         if (meetingEvents_list[item.u_id] === undefined) {
@@ -616,7 +632,7 @@ function taskList(userObj_array) {
         meetingsHours_list.push({'user_idNo': j, 'work_totalHours': meetingEvents_list[j]});
     }
 
-    //sorting the meetings list
+    // //sorting the meetings list
     meetingsHours_list.sort(function (a, b) {
         return parseInt(b.work_totalHours) - parseInt(a.work_totalHours);
     });
@@ -625,7 +641,7 @@ function taskList(userObj_array) {
     taskHours_list.sort(function (a, b) {
         return parseInt(b.work_totalHours) - parseInt(a.work_totalHours);
     });
-    //looping through the user data to fetch names and display the user names list in the descending order of busy hours for tasks.
+    // //looping through the user data to fetch names and display the user names list in the descending order of busy hours for tasks.
     taskHours_list.forEach(function (result) {
         for (var j in user_data) {
             user_data[j].forEach(function (res) {
@@ -648,11 +664,11 @@ function taskList(userObj_array) {
         }
 
     })
-    //appending the list to the html task label.
+    // //appending the list to the html task label.
+
     var task_div = document.getElementById('task_list');
     $('#task_list').empty();
     task_div.append(task_label);
-
 
     //looping through the user data to fetch names and display the user names list in the descending order of busy hours for meetings.
     meetingsHours_list.forEach(function (result) {
@@ -684,3 +700,4 @@ function taskList(userObj_array) {
     $('#meetings_list').empty();
     meetings_div.append(meetings_label);
 }
+
