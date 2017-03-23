@@ -32,7 +32,7 @@ events_data = (function () {
 console.log(events_data);
 
 //method to populate the user names in the drop down menu
-window.onload = function () {
+(function () {
     var dropwdown_menu = document.getElementById("user_menu");
     var li_tag;
     var ids = [];
@@ -50,7 +50,7 @@ window.onload = function () {
     }
 
 
-}
+}());
 
 
 
